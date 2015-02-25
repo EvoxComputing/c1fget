@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>C1fget by EvoxComputing</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>C1fget</h1>
+        <p>C1fApp script for retrieving threat intelligence lists with API</p>
+        <p class="view"><a href="https://github.com/EvoxComputing/c1fget">View the Project on GitHub <small>EvoxComputing/c1fget</small></a></p>
+        <ul>
+          <li><a href="https://github.com/EvoxComputing/c1fget/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/EvoxComputing/c1fget/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/EvoxComputing/c1fget">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h3>
+<a id="c1fapp-list-retrieval-script" class="anchor" href="#c1fapp-list-retrieval-script" aria-hidden="true"><span class="octicon octicon-link"></span></a>C1fApp list retrieval script</h3>
+
+<p>This is a script developed for convenience for retrieving C1fApp threat feed lists via command line. You can use it in your own script or as a cronjob:</p>
+
+<pre><code>$ git clone https://github.com/EvoxComputing/c1fget.git
+$ cd c1fget/
+$ chmod +x c1lists.sh
+$ c1fget.sh -h
+</code></pre>
+
+<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+
+<h3>
+<a id="supported-formats" class="anchor" href="#supported-formats" aria-hidden="true"><span class="octicon octicon-link"></span></a>Supported formats</h3>
+
+<p>C1fapp lists when downloaded from the API interface are available at the following formats:</p>
+
+<ul>
+<li>CSV</li>
+<li>Json</li>
+<li>Bro IDS</li>
+</ul>
+
+<h3>
+<a id="bro-ids-and-threat-intel" class="anchor" href="#bro-ids-and-threat-intel" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bro IDS and threat intel</h3>
+
+<p>Bro IDS supports threat intelligence lists by default. All you have to do is:</p>
+
+<pre><code>$ c1fget.sh -h
+$ c1fget.sh -k API_KEY -b
+</code></pre>
+
+<ol>
+<li>Place the list (c1fapp_malware.bro) in the appropriate directory (e.g. /usr/local/bro/intel/feeds)</li>
+<li>Add the below in $BRO_ROOT/share/bro/site/local.bro</li>
+</ol>
+
+<pre><code>const feed_directory = "/usr/local/bro/intel/";
+@load frameworks/intel/seen
+
+redef Intel::read_files += {
+        @feed_directory + "/c1fapp_malware.bro"
+};
+</code></pre>
+
+<h3>
+<a id="what-type-of-information-or-lists-does-c1fapp-provide-" class="anchor" href="#what-type-of-information-or-lists-does-c1fapp-provide-" aria-hidden="true"><span class="octicon octicon-link"></span></a>What type of information or lists does C1fApp provide ?</h3>
+
+<p>We follow the same concept as the Collective Intelligence Framework concept. We provide 4 main "assesments":</p>
+
+<ul>
+<li><p><strong>Botnet</strong>
+Typically a host used to control another host or malicious process. Matching traffic would usually indicate infection typically used to identify compromised hosts</p></li>
+<li><p><strong>Malware</strong> Typically a host used to exploit and/or drop malware to a host for the first time but NOT a botnet controller (although they could overlap) Communications with these indicators may lead to a compromise and then to a possible botnet controller communication (if the infection was successful). Typically used in preemptive blocking, alerts may not indicate infection was successful</p></li>
+<li><p><strong>Suspicious</strong> Used as the "default" assessment, combined with the source "description" for more accurate assessment. In suspicious you will also fin Tor Exit nodes and anonymous proxy connections.</p></li>
+<li><p><strong>Whitelists</strong> Denotes that specific entity (usually an address) should be considered harmless in nature based on well known 3rd party lists such as Alexa Ranking. It also denotes that blocking an entity which is whitelisted would result in mass collateral damage (eg: Yahoo Virtual hosted services) Confidence is attempted to be applied to each entry to help calculate risk associated with whitelist entry. Some times you will find that a well known domain hosts malware. So it will appear with both tags "Malware" and "Whitelist"</p></li>
+</ul>
+
+<h3>
+<a id="start-now" class="anchor" href="#start-now" aria-hidden="true"><span class="octicon octicon-link"></span></a>Start now!</h3>
+
+<p>Register for free at <a href="https://www.c1fapp.com">https://www.c1fapp.com</a> ! Please use a valid email address to get your account approved faster. Business emails are approved in very short time</p>
+
+<h3>
+<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>Script by <a href="https://github.com/verestio" class="user-mention">@verestio</a></p>
+
+<h3>
+<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+
+<p>Contact <a href="mailto:info@evoxco.com">info@evoxco.com</a></p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/EvoxComputing">EvoxComputing</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
