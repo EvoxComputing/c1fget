@@ -34,8 +34,8 @@
 
 <pre><code>$ git clone https://github.com/EvoxComputing/c1fget.git
 $ cd c1fget/
-$ chmod +x c1lists.sh
-$ c1fget.sh -h
+$ chmod +x c1fget.sh
+$ ./c1fget.sh -h
 </code></pre>
 
 <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
@@ -56,8 +56,9 @@ $ c1fget.sh -h
 
 <p>Bro IDS supports threat intelligence lists by default. All you have to do is:</p>
 
-<pre><code>$ c1fget.sh -h
-$ c1fget.sh -k API_KEY -b
+<pre><code>$ ./c1fget.sh -h
+$ ./c1fget.sh -k API_KEY -b
+$ cp c1fapp_Threat_Feed/c1fapp_malware /usr/local/bro/intel/c1fapp_malware.bro
 </code></pre>
 
 <ol>
