@@ -6,8 +6,8 @@ C1fApp script for retrieving lists with API
 C1fapp threat list Bash script
 Usage: c1fget.sh -k <c1fapp key> or -f <c1fapp key file> [options...]
 Options:
-  -k/--key <c1fapp key> Provide the C1fapp feed key. If no other agumnet Menu will prompt
-  -f/--file   <file>    Set file containing the C1fapp feed key. If no other agumnet Menu will prompt
+  -k/--key <c1fapp key> Provide the C1fapp feed key. If no other argumnet Menu will prompt
+  -f/--file   <file>    Set file containing the C1fapp feed key. If no other argumnet Menu will prompt
   -a/--all            	ALL feeds not JSON
   -b/--bro            	C1fapp Bro Ids combined
   -d/--dom            	Domain threat feed list
