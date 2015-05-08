@@ -6,9 +6,11 @@
 set -e
 # ^ error checking :: Highly Recommended (caveat:  you can't check $? later).  
 
+
+
 #C1fapp Threat Feeds
-c1fapp_feeds="c1fapp_bro infra domain url json malware ALL"
-c1fapp_feeds_json=(infra url domain)
+c1fapp_feeds="c1fapp_bro infra domain url json malware open_c1fapp ALL"
+c1fapp_feeds_json=(infra url domain open_c1fapp)
 
 
 #C1fapp Threat Feed lists 
@@ -45,7 +47,7 @@ if [ ! -x "$list_zip" ]; then
 	exit 0
 fi
 
-timeout=3
+timeout=10
 
 #Proxy Settings 
 
@@ -106,11 +108,13 @@ function OutputUsage
   echo "  -k/--key <c1fapp key> Provide the C1fapp feed key. If no other agumnet Menu will prompt"
   echo "  -f/--file   <file>    Set file containing the C1fapp feed key. If no other agumnet Menu will prompt"
   echo "  -a/--all           	ALL feeds INCLUDING JSON"
+  echo "  -op/--open-c1fapp     Open c1fapp feeds. "
   echo "  -b/--bro            	C1fapp Bro Ids combined"
   echo "  -d/--dom            	Domain Malware / Botnet / Whitelist threat feed list"
   echo "  -i/--infra           	Infrastructure Malware / Botnet / Scan / Suspicious / Whitelist threat feed list"
   echo "  -j/--json            	Json format Domain / Infrastructure / URL threat feed list"
   echo "  -u/--url            	URL Botnet / Malware threat feed list"
+  echo "  -mmd5/--mal-md5       Malware MD% checksum"
   echo "  -h/--help             Output this message"
   echo "  -V/--version          Output version number" 
   echo
@@ -120,6 +124,15 @@ function OutputUsage
 }
 
 
+function open_c1fapp_feeds () {
+
+                           c1fapp_feed="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/open_c1fapp/csv/"
+                           out_file="open_c1fapp.csv.gz"
+                           echo "------Downloading ${out_file}------------"
+                           echo "$(curl -R -f $c1fapp_feed --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
+                           $list_zip -f -d -k $feed_dir/$out_file
+}
+
 function bro_feeds () {
 		
 		for list in "${c1fapp_lists_c1fapp_bro[@]}"
@@ -127,8 +140,7 @@ function bro_feeds () {
 
                            c1fapp_feed="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/c1fapp_${list}/bro/"
                            out_file="c1fapp_${list}.bro.gz"
-                           echo "------Downloading ${out_file}------------"  
-                           #echo "$(wget -r -N $c1fapp_feed $feed_dir/$out_file)"
+                           echo "------Downloading ${out_file}------------"
                            echo "$(curl -R -f $c1fapp_feed --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
                            $list_zip -f -d -k $feed_dir/$out_file
                 done
@@ -214,6 +226,18 @@ function json_feeds () {
 					 $list_zip -f -d -k $feed_dir/$out_file
 					 done
 				fi	
+#D.L to fix this as there is no list in json for open_C1fapp
+			#	if [ $feed = "open_c1fapp" ]
+             #   then
+
+             #       c1fapp_feeds_json="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/open_c1fapp/json/"
+              #      out_file="open_c1fapp.gz"
+              #      echo "------Downloading ${out_file}------------"
+               #     echo "$(curl -R -f $c1fapp_feeds_json --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
+                #    $list_zip -f -d -k $feed_dir/$out_file
+
+				#fi
+
 				if [ $feed = "domain" ]
                                 then
 				        for list in "${c1fapp_lists_json_domain[@]}"
@@ -226,20 +250,25 @@ function json_feeds () {
 
                          done
 				fi
+
 			done
 
 }
 
-if [ "$#" == "-k" ] || [ "$#" == "-f" ];then
+if [ -z "$1" ]; then
 	OutputUsage
 fi
+
+#need to check if $1 is -k --key -f --file
+###
 
 while [ "$#" -gt "0" ]; do
 
 	case "$1" in
 	 -f|--file)
+
 		saved_api_key="${2:-''}"
-		if [ ! -f $saved_api_key ];then
+		if [ ! -f "$saved_api_key" ];then
 			echo "Please provide a file that contains the key from C1fapp"	
 			exit 1	
 		else
@@ -255,7 +284,8 @@ while [ "$#" -gt "0" ]; do
 		fi
 	 ;;
 	 -k|--key)
-		saved_api_key="$2"
+
+        saved_api_key="$2"
 		if [ -z "$saved_api_key" ];then
 			echo "Please provide a key from C1fapp"	
 			exit 1	
@@ -269,38 +299,43 @@ while [ "$#" -gt "0" ]; do
 		fi
 	 ;;
 	 -i|--infra)
-
-	    check_AAA
 		infra_feeds
 		shift 1
 		exit 1
 	;;	
 	-b|--bro)
-	    check_AAA
-		bro_feeds
-		shift 1 
+	    	bro_feeds
+		shift 1
 		exit 1
 	;;
 	-d|--dom)
-	    check_AAA
+
 		dom_feeds
 		shift 1 
 		exit 1
 	;;	
 	-u|--url)
-	    check_AAA
+
 		url_feeds
 		shift 1 
 		exit 1
 	;;
 	-j|--json)
-	    check_AAA
 		json_feeds
 		shift 1 
 		exit 1
 	;;
+	-op|--open-c1fapp)
+	    open_c1fapp_feeds
+	    shift 1
+	    exit 1
+    ;;
+	-mmd5|--mal-md5)
+	    malware_feeds
+	    shift 1
+	    exit 1
+    ;;
 	-a|--all)
-	    check_AAA
 	    c1fapp_dir
 		infra_feeds
 		dom_feeds
@@ -308,6 +343,8 @@ while [ "$#" -gt "0" ]; do
 		bro_feeds
 		malware_feeds
 		json_feeds
+		open_c1fapp_feeds
+
 		shift 1
 		exit 1
 	;;	
@@ -338,12 +375,16 @@ done
 		#C1fapp Bro Ids combined
 		elif [ $opt = "c1fapp_bro" ]; then
 
-                    bro_feeds
+                bro_feeds
 		#DOMAIN
 		elif [ $opt = "domain" ]; then 
 			
 				dom_feeds
-		#URL	
+		#OPEN_C1FAPP
+		elif [ $opt = "open_c1fapp" ]; then
+
+		        open_c1fapp_feeds
+		#URL
 		elif [ $opt = "url" ]; then 
 
 				url_feeds	
@@ -357,12 +398,14 @@ done
 				json_feeds			
 	
 		elif [ $opt = "ALL" ]; then 
-			bro_feeds	
-			infra_feeds
-			dom_feeds
-			url_feeds
-			malware_feeds
-			json_feeds
+
+			    bro_feeds
+			    infra_feeds
+			    dom_feeds
+			    url_feeds
+			    malware_feeds
+			    json_feeds
+			    open_c1fapp_feeds
 
 		else  
 		
