@@ -18,6 +18,7 @@ c1fapp_lists_c1fapp_bro=(malware)
 c1fapp_lists_domain=(botnet botnet_full malware malware_full whitelist)
 c1fapp_lists_infra=(botnet botnet_full malware malware_full scan suspicious suspicious_full whitelist)
 c1fapp_lists_url=(botnet malware)
+c1fapp_lists_block=(block_ip_domain)
 c1fapp_lists_malware=(md5)
 
 #Json Thread Feed lists
@@ -28,6 +29,7 @@ c1fapp_lists_json_url=(botnet_full malware_full)
 ########################################
 
 #c1fapp variables
+URI="https://www.c1fapp.com"
 c1fapp_uri="/cifapp/apilistget"
 args=("$@")
 
@@ -84,7 +86,7 @@ function c1fapp_dir {
 
 function check_AAA () {
 
-http_status="$(curl -Is  -w %{http_code} "https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/infra_malware/csv/" --output '/dev/null')"
+http_status="$(curl -Is  -w %{http_code} "${URI}${c1fapp_uri}/${saved_api_key}/infra_malware/csv/" --output '/dev/null')"
 
 
 	if [ $http_status -eq 403 ];then
@@ -109,6 +111,7 @@ function OutputUsage
   echo "  -f/--file   <file>    Set file containing the C1fapp feed key. If no other agumnet Menu will prompt"
   echo "  -a/--all           	ALL feeds INCLUDING JSON"
   echo "  -op/--open-c1fapp     Open c1fapp feeds. "
+  echo "  -bl/--block-lists     IP/Domain block list CSV "
   echo "  -b/--bro            	C1fapp Bro Ids combined"
   echo "  -d/--dom            	Domain Malware / Botnet / Whitelist threat feed list"
   echo "  -i/--infra           	Infrastructure Malware / Botnet / Scan / Suspicious / Whitelist threat feed list"
@@ -126,7 +129,7 @@ function OutputUsage
 
 function open_c1fapp_feeds () {
 
-                           c1fapp_feed="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/open_c1fapp/csv/"
+                           c1fapp_feed="${URI}${c1fapp_uri}/${saved_api_key}/open_c1fapp/csv/"
                            out_file="open_c1fapp.csv.gz"
                            echo "------Downloading ${out_file}------------"
                            echo "$(curl -R -f $c1fapp_feed --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
@@ -138,7 +141,7 @@ function bro_feeds () {
 		for list in "${c1fapp_lists_c1fapp_bro[@]}"
                 do
 
-                           c1fapp_feed="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/c1fapp_${list}/bro/"
+                           c1fapp_feed="${URI}${c1fapp_uri}/${saved_api_key}/c1fapp_${list}/bro/"
                            out_file="c1fapp_${list}.bro.gz"
                            echo "------Downloading ${out_file}------------"
                            echo "$(curl -R -f $c1fapp_feed --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
@@ -146,12 +149,26 @@ function bro_feeds () {
                 done
 
 }
+
+function blocklists () {
+
+		for list in "${c1fapp_lists_block[@]}"
+			do
+				c1fapp_feeds="${URI}${c1fapp_uri}/${saved_api_key}/${list}/csv/"
+				out_file="${list}.csv.gz"
+				echo "------Downloading ${out_file}------------"
+				echo $(curl -R -f  $c1fapp_feeds --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)
+			 	$list_zip -f -d -k $feed_dir/$out_file
+			done
+
+}
+
 function dom_feeds () {
 
 		for list in "${c1fapp_lists_domain[@]}"
                 do
 
-                           c1fapp_feed="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/domain_${list}/csv/"
+                           c1fapp_feed="${URI}${c1fapp_uri}/${saved_api_key}/domain_${list}/csv/"
                            out_file="domain_${list}.csv.gz"
                            echo "------Downloading ${out_file}------------"  
                            #echo "$(wget -r -N $c1fapp_feed $feed_dir/$out_file)"
@@ -165,7 +182,7 @@ function infra_feeds () {
 
 		for list in "${c1fapp_lists_infra[@]}"
                        do
-                           c1fapp_feeds="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/infra_${list}/csv/"
+                           c1fapp_feeds="${URI}${c1fapp_uri}/${saved_api_key}/infra_${list}/csv/"
                            out_file="infra_${list}.csv.gz"
                            echo "------Downloading ${out_file}------------"  
                            echo "$(curl -R -f $c1fapp_feeds --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
@@ -178,7 +195,7 @@ function url_feeds () {
 		
 		for list in "${c1fapp_lists_url[@]}" 	
 			do	
-				c1fapp_feeds="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/url_${list}/csv/"
+				c1fapp_feeds="${URI}${c1fapp_uri}/${saved_api_key}/url_${list}/csv/"
 				out_file="url_${list}.csv.gz"
 				echo "------Downloading ${out_file}------------"  
 				echo $(curl -R -f  $c1fapp_feeds --connect-timeout $timeout --keepalive --output $feed_dir/$out_file) 
@@ -190,7 +207,7 @@ function malware_feeds () {
 
 		for list in "${c1fapp_lists_malware[@]}" 	
 			do	
-				c1fapp_feeds="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/malware_${list}/csv/"
+				c1fapp_feeds="${URI}${c1fapp_uri}/${saved_api_key}/malware_${list}/csv/"
 				out_file="malware_${list}.csv.gz"
 				echo "------Downloading ${out_file}------------"  
 				echo $(curl -R -f $c1fapp_feeds --connect-timeout $timeout --keepalive --output $feed_dir/$out_file) 
@@ -207,7 +224,7 @@ function json_feeds () {
 				then
 					for list in "${c1fapp_lists_json_infra[@]}"
 					do	
-					 c1fapp_feeds_json="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/${feed}_${list}/json/"
+					 c1fapp_feeds_json="${URI}${c1fapp_uri}/${saved_api_key}/${feed}_${list}/json/"
 					 out_file="${feed}_${list}.json.gz"
                      echo "------Downloading ${out_file}------------"
                      echo "$(curl -R -f $c1fapp_feeds_json --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
@@ -219,18 +236,19 @@ function json_feeds () {
 				then
 					for list in "${c1fapp_lists_json_url[@]}"
 					do	
-					 c1fapp_feeds_json="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/${feed}_${list}/json/"
+					 c1fapp_feeds_json="${URI}${c1fapp_uri}/${saved_api_key}/${feed}_${list}/json/"
                      out_file="${feed}_${list}.json.gz"
                      echo "------Downloading ${out_file}------------"
                      echo "$(curl -R -f $c1fapp_feeds_json --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
 					 $list_zip -f -d -k $feed_dir/$out_file
 					 done
-				fi	
+				fi
+
 #D.L to fix this as there is no list in json for open_C1fapp
 			#	if [ $feed = "open_c1fapp" ]
              #   then
 
-             #       c1fapp_feeds_json="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/open_c1fapp/json/"
+             #       c1fapp_feeds_json="${URI}${c1fapp_uri}/${saved_api_key}/open_c1fapp/json/"
               #      out_file="open_c1fapp.gz"
               #      echo "------Downloading ${out_file}------------"
                #     echo "$(curl -R -f $c1fapp_feeds_json --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
@@ -242,7 +260,7 @@ function json_feeds () {
                                 then
 				        for list in "${c1fapp_lists_json_domain[@]}"
                                         do
-                         c1fapp_feeds_json="https://www.c1fapp.com${c1fapp_uri}/${saved_api_key}/${feed}_${list}/json/"
+                         c1fapp_feeds_json="${URI}${c1fapp_uri}/${saved_api_key}/${feed}_${list}/json/"
                          out_file="${feed}_${list}.json.gz"
                          echo "------Downloading ${out_file}------------"
                          echo "$(curl -R -f $c1fapp_feeds_json --connect-timeout $timeout --keepalive --output $feed_dir/$out_file)"
@@ -325,6 +343,11 @@ while [ "$#" -gt "0" ]; do
 		shift 1 
 		exit 1
 	;;
+	-bl|--block-lists)
+		blocklists
+		shift 1
+		exit 1
+	;;
 	-op|--open-c1fapp)
 	    open_c1fapp_feeds
 	    shift 1
@@ -376,6 +399,11 @@ done
 		elif [ $opt = "c1fapp_bro" ]; then
 
                 bro_feeds
+
+        #Block lists
+        elif [ $opt = "blocklists" ]; then
+
+				blocklists
 		#DOMAIN
 		elif [ $opt = "domain" ]; then 
 			
