@@ -10,6 +10,7 @@ Options:
   -f/--file   <file>    Set file containing the C1fapp feed key. If no other argumnet Menu will prompt
   -a/--all            	ALL feeds not JSON
   -b/--bro            	C1fapp Bro Ids combined
+  -bl                 	C1fapp IP/Domain blocklist 
   -d/--dom            	Domain threat feed list
   -i/--infra           	Infrastructure threat feed list
   -j/--json            	Json threat feed list
